@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOLO LEVELING</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6b21d4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Solo Leveling">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #030308;
+    --bg-card: #0a0a18;
+    --bg-card2: #0d0d20;
+    --purple-dark: #1a0a2e;
+    --purple-mid: #2d1b5e;
+    --purple-glow: #6b21d4;
+    --purple-bright: #9b4dff;
+    --purple-light: #c084fc;
+    --blue-glow: #1e3a8a;
+    --blue-bright: #3b82f6;
+    --gold: #f59e0b;
+    --gold-light: #fbbf24;
+    --red-danger: #dc2626;
+    --green-ok: #16a34a;
+    --text-primary: #e2d9f3;
+    --text-dim: #7c6fa0;
+    --text-muted: #4a3d6b;
+    --border-glow: rgba(107,33,212,0.4);
+    --border-dim: rgba(107,33,212,0.15);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  body::before {
+    content:'';
+    position:fixed;
+    inset:0;
+    background:
+      radial-gradient(ellipse 80% 40% at 50% 0%, rgba(107,33,212,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 60% at 80% 100%, rgba(30,58,138,0.08) 0%, transparent 70%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* ── NOTIFICATION OVERLAY ── */
+  #questOverlay {
+    position:fixed; inset:0; z-index:1000;
+    background:rgba(0,0,0,0.92);
+    display:flex; align-items:center; justify-content:center;
+    backdrop-filter:blur(4px);
+    animation: fadeInOverlay 0.6s ease;
+  }
+  @keyframes fadeInOverlay { from{opacity:0} to{opacity:1} }
+
+  .quest-popup {
+    width:min(360px,92vw);
+    background: linear-gradient(160deg, #0d0520 0%, #1a0a2e 50%, #0a0318 100%);
+    border:1px solid rgba(155,77,255,0.5);
+    border-radius:4px;
+    box-shadow:
+      0 0 60px rgba(107,33,212,0.4),
+      0 0 120px rgba(107,33,212,0.15),
+      inset 0 1px 0 rgba(155,77,255,0.2);
+    overflow:hidden;
+    animation: popupSlide 0.7s cubic-bezier(0.16,1,0.3,1);
+    position:relative;
+  }
+  @keyframes popupSlide {
+    from { transform:translateY(-40px) scale(0.95); opacity:0; }
+    to   { transform:translateY(0) scale(1); opacity:1; }
+  }
+
+  .popup-scan {
+    position:absolute; inset:0; pointer-events:none; z-index:1;
+    background: linear-gradient(180deg, transparent 0%, rgba(155,77,255,0.03) 50%, transparent 100%);
+    animation: scan 3s linear infinite;
+  }
+  @keyframes scan {
+    0%   { background-position: 0 -100%; }
+    100% { background-position: 0 200%; }
+  }
+
+  .popup-top-bar {
+    background: linear-gradient(90deg, rgba(107,33,212,0.6), rgba(155,77,255,0.3), rgba(107,33,212,0.6));
+    padding:6px 16px;
+    display:flex; align-items:center; gap:8px;
+    border-bottom:1px solid rgba(155,77,255,0.3);
+  }
+  .popup-top-bar .dot {
+    width:6px; height:6px; border-radius:50%;
+    background:var(--purple-bright);
+    box-shadow: 0 0 8px var(--purple-bright);
+    animation: blink 1.2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .popup-top-bar span {
+    font-family:'Orbitron',monospace;
+    font-size:9px; letter-spacing:3px;
+    color:var(--purple-light); text-transform:uppercase;
+  }
+
+  .popup-body { padding:24px 20px 20px; position:relative; z-index:2; }
+
+  .popup-icon {
+    width:56px; height:56px; margin:0 auto 16px;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid rgba(155,77,255,0.4);
+    border-radius:50%;
+    background: radial-gradient(circle, rgba(107,33,212,0.3), transparent);
+    box-shadow: 0 0 20px rgba(107,33,212,0.4);
+    font-size:26px;
+    animation: iconPulse 2s ease-in-out infinite;
+  }
+  @keyframes iconPulse {
+    0%,100%{ box-shadow:0 0 20px rgba(107,33,212,0.4); }
+    50%    { box-shadow:0 0 35px rgba(155,77,255,0.6); }
+  }
+
+  .popup-title {
+    font-family:'Cinzel Decorative',serif;
+    font-size:11px; letter-spacing:4px;
+    color:var(--purple-light); text-align:center;
+    text-transform:uppercase; margin-bottom:6px;
+  }
+  .popup-heading {
+    font-family:'Orbitron',monospace;
+    font-size:18px; font-weight:900;
+    color:#fff; text-align:center;
+    text-shadow: 0 0 20px rgba(155,77,255,0.8);
+    margin-bottom:4px;
+  }
+  .popup-sub {
+    text-align:center; font-size:12px;
+    color:var(--text-dim); letter-spacing:1px;
+    margin-bottom:20px;
+  }
+
+  .popup-quests { display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
+  .popup-quest-item {
+    display:flex; align-items:center; gap:10px;
+    background:rgba(107,33,212,0.08);
+    border:1px solid rgba(107,33,212,0.2);
+    border-radius:3px; padding:10px 12px;
+  }
+  .pq-icon { font-size:16px; width:20px; text-align:center; }
+  .pq-text { flex:1; font-size:13px; font-weight:600; color:var(--text-primary); }
+  .pq-count { font-family:'Orbitron',monospace; font-size:11px; color:var(--purple-bright); }
+
+  .popup-countdown {
+    text-align:center; margin-bottom:20px;
+  }
+  .countdown-label {
+    font-size:10px; letter-spacing:2px; color:var(--text-muted);
+    text-transform:uppercase; margin-bottom:4px;
+  }
+  .countdown-timer {
+    font-family:'Orbitron',monospace;
+    font-size:22px; font-weight:700;
+    color:var(--gold);
+    text-shadow: 0 0 15px rgba(245,158,11,0.6);
+    letter-spacing:3px;
+  }
+
+  .popup-progress-bar {
+    height:2px; background:rgba(255,255,255,0.05);
+    border-radius:1px; margin-bottom:20px; overflow:hidden;
+  }
+  .popup-progress-fill {
+    height:100%;
+    background: linear-gradient(90deg, var(--purple-glow), var(--purple-bright));
+    border-radius:1px;
+    animation: progressDrain linear forwards;
+  }
+
+  .popup-btn {
+    width:100%; padding:14px;
+    background: linear-gradient(135deg, rgba(107,33,212,0.4), rgba(155,77,255,0.3));
+    border:1px solid rgba(155,77,255,0.5);
+    border-radius:3px; color:#fff;
+    font-family:'Orbitron',monospace;
+    font-size:12px; font-weight:700;
+    letter-spacing:3px; text-transform:uppercase;
+    cursor:pointer; transition:all 0.3s;
+    box-shadow: 0 0 20px rgba(107,33,212,0.3);
+  }
+  .popup-btn:hover {
+    background: linear-gradient(135deg, rgba(107,33,212,0.7), rgba(155,77,255,0.5));
+    box-shadow: 0 0 35px rgba(107,33,212,0.5);
+    transform:translateY(-1px);
+  }
+
+  /* ── MAIN APP ── */
+  #mainApp { display:none; position:relative; z-index:1; }
+
+  header {
+    padding:12px 16px;
+    display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid var(--border-dim);
+    background:rgba(10,10,24,0.8);
+    backdrop-filter:blur(10px);
+    position:sticky; top:0; z-index:100;
+  }
+  .header-logo {
+    font-family:'Cinzel Decorative',serif;
+    font-size:13px; letter-spacing:3px;
+    color:var(--purple-bright);
+    text-shadow: 0 0 15px rgba(155,77,255,0.5);
+  }
+  .header-time {
+    font-family:'Orbitron',monospace;
+    font-size:11px; color:var(--text-dim); letter-spacing:2px;
+  }
+
+  .container { padding:16px; max-width:480px; margin:0 auto; }
+
+  /* ── PROFILE CARD ── */
+  .profile-card {
+    background: linear-gradient(135deg, #0d0520 0%, #12063a 50%, #0a0318 100%);
+    border:1px solid var(--border-glow);
+    border-radius:6px;
+    box-shadow: 0 0 40px rgba(107,33,212,0.2), inset 0 1px 0 rgba(155,77,255,0.1);
+    padding:20px; margin-bottom:16px;
+    position:relative; overflow:hidden;
+  }
+  .profile-card::before {
+    content:'';
+    position:absolute; top:-50%; right:-30%;
+    width:200px; height:200px; border-radius:50%;
+    background:radial-gradient(circle, rgba(107,33,212,0.15), transparent 70%);
+    pointer-events:none;
+  }
+
+  .profile-rank-row {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:6px;
+  }
+  .rank-badge {
+    display:flex; align-items:center; gap:8px;
+  }
+  .rank-letter {
+    font-family:'Cinzel Decorative',serif;
+    font-size:36px; font-weight:900;
+    color:var(--purple-bright);
+    text-shadow: 0 0 30px rgba(155,77,255,0.8), 0 0 60px rgba(107,33,212,0.4);
+    line-height:1;
+  }
+  .rank-info { display:flex; flex-direction:column; }
+  .rank-label {
+    font-size:9px; letter-spacing:3px; color:var(--text-muted);
+    text-transform:uppercase;
+  }
+  .rank-name {
+    font-family:'Orbitron',monospace;
+    font-size:14px; font-weight:700; color:var(--purple-light);
+  }
+
+  .level-display {
+    text-align:right;
+  }
+  .level-num {
+    font-family:'Orbitron',monospace;
+    font-size:28px; font-weight:900; color:#fff;
+    text-shadow: 0 0 20px rgba(255,255,255,0.3);
+  }
+  .level-label {
+    font-size:9px; letter-spacing:3px; color:var(--text-muted);
+    text-transform:uppercase; text-align:right;
+  }
+
+  .profile-divider {
+    height:1px;
+    background: linear-gradient(90deg, transparent, rgba(107,33,212,0.5), transparent);
+    margin:14px 0;
+  }
+
+  /* XP & COINS ROW */
+  .xp-coins-row { display:flex; gap:12px; margin-bottom:14px; }
+  .stat-pill {
+    flex:1; background:rgba(107,33,212,0.08);
+    border:1px solid rgba(107,33,212,0.2);
+    border-radius:4px; padding:10px 12px;
+  }
+  .stat-pill-label {
+    font-size:9px; letter-spacing:2px; color:var(--text-muted);
+    text-transform:uppercase; margin-bottom:4px;
+  }
+  .stat-pill-value {
+    font-family:'Orbitron',monospace;
+    font-size:18px; font-weight:700;
+  }
+  .stat-pill-value.xp { color:var(--purple-bright); text-shadow:0 0 10px rgba(155,77,255,0.5); }
+  .stat-pill-value.coins { color:var(--gold); text-shadow:0 0 10px rgba(245,158,11,0.4); }
+
+  .xp-bar-wrap { margin-bottom:14px; }
+  .xp-bar-label {
+    display:flex; justify-content:space-between;
+    font-size:10px; color:var(--text-muted); margin-bottom:5px;
+    letter-spacing:1px;
+  }
+  .xp-bar {
+    height:4px; background:rgba(255,255,255,0.05);
+    border-radius:2px; overflow:hidden;
+  }
+  .xp-bar-fill {
+    height:100%;
+    background: linear-gradient(90deg, var(--purple-glow), var(--purple-bright), var(--purple-light));
+    border-radius:2px; transition:width 1s ease;
+    box-shadow: 0 0 8px rgba(155,77,255,0.6);
+  }
+
+  /* STATS GRID */
+  .stats-section-title {
+    font-size:9px; letter-spacing:3px; color:var(--text-muted);
+    text-transform:uppercase; margin-bottom:10px;
+  }
+  .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .stat-box {
+    background:rgba(10,10,24,0.6);
+    border:1px solid var(--border-dim);
+    border-radius:4px; padding:10px 12px;
+    position:relative; overflow:hidden;
+    transition:border-color 0.3s;
+  }
+  .stat-box.locked { opacity:0.4; }
+  .stat-box.locked::after {
+    content:'🔒';
+    position:absolute; top:8px; right:8px;
+    font-size:12px;
+  }
+  .stat-box:not(.locked) { cursor:pointer; }
+  .stat-box:not(.locked):hover { border-color:rgba(155,77,255,0.4); }
+
+  .stat-box-name {
+    font-size:9px; letter-spacing:2px; color:var(--text-muted);
+    text-transform:uppercase; margin-bottom:4px;
+  }
+  .stat-box-val {
+    font-family:'Orbitron',monospace;
+    font-size:22px; font-weight:700; color:var(--text-primary);
+  }
+  .stat-box-bar {
+    height:2px; background:rgba(255,255,255,0.05);
+    border-radius:1px; margin-top:6px; overflow:hidden;
+  }
+  .stat-box-bar-fill {
+    height:100%; border-radius:1px;
+    transition:width 1s ease;
+  }
+  .str-bar { background: linear-gradient(90deg,#dc2626,#ef4444); box-shadow:0 0 6px rgba(220,38,38,0.5); }
+  .agi-bar { background: linear-gradient(90deg,#16a34a,#22c55e); box-shadow:0 0 6px rgba(22,163,74,0.5); }
+  .vit-bar { background: linear-gradient(90deg,#2563eb,#3b82f6); box-shadow:0 0 6px rgba(37,99,235,0.5); }
+  .sen-bar { background: linear-gradient(90deg,#d97706,#f59e0b); box-shadow:0 0 6px rgba(217,119,6,0.5); }
+  .int-bar { background: linear-gradient(90deg,var(--purple-glow),var(--purple-bright)); box-shadow:0 0 6px rgba(107,33,212,0.5); }
+
+  /* TRANSFORM XP BTN */
+  .transform-btn {
+    width:100%; margin-top:14px; padding:12px;
+    background: linear-gradient(135deg, rgba(107,33,212,0.25), rgba(155,77,255,0.15));
+    border:1px solid rgba(155,77,255,0.3);
+    border-radius:4px; color:var(--purple-light);
+    font-family:'Orbitron',monospace;
+    font-size:10px; font-weight:700; letter-spacing:2px;
+    cursor:pointer; transition:all 0.3s;
+  }
+  .transform-btn:hover {
+    background: linear-gradient(135deg, rgba(107,33,212,0.5), rgba(155,77,255,0.3));
+    box-shadow:0 0 20px rgba(107,33,212,0.3);
+  }
+
+  /* ── SECTION TABS ── */
+  .tabs { display:flex; gap:0; margin-bottom:16px; border-radius:4px; overflow:hidden; border:1px solid var(--border-dim); }
+  .tab-btn {
+    flex:1; padding:10px 4px;
+    background:transparent; border:none;
+    font-family:'Orbitron',monospace;
+    font-size:9px; letter-spacing:1px; color:var(--text-muted);
+    cursor:pointer; transition:all 0.3s; text-transform:uppercase;
+  }
+  .tab-btn.active {
+    background:rgba(107,33,212,0.2);
+    color:var(--purple-light);
+    box-shadow:inset 0 -2px 0 var(--purple-bright);
+  }
+
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
+
+  /* ── QUESTS ── */
+  .quest-card {
+    background: linear-gradient(135deg, #0a0a18, #0d0520);
+    border:1px solid var(--border-dim);
+    border-radius:6px; padding:16px; margin-bottom:12px;
+    position:relative; overflow:hidden;
+  }
+  .quest-card::before {
+    content:'';
+    position:absolute; left:0; top:0; bottom:0;
+    width:3px;
+    background: linear-gradient(180deg, var(--purple-glow), var(--purple-bright));
+    box-shadow:0 0 8px var(--purple-glow);
+  }
+
+  .quest-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .quest-title { font-size:14px; font-weight:700; color:var(--text-primary); letter-spacing:1px; }
+  .quest-xp {
+    font-family:'Orbitron',monospace;
+    font-size:11px; color:var(--purple-bright);
+    background:rgba(107,33,212,0.15);
+    border:1px solid rgba(107,33,212,0.3);
+    padding:3px 8px; border-radius:2px;
+  }
+
+  .quest-progress-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .quest-prog-bar { flex:1; height:4px; background:rgba(255,255,255,0.05); border-radius:2px; overflow:hidden; }
+  .quest-prog-fill {
+    height:100%;
+    background: linear-gradient(90deg, var(--purple-glow), var(--purple-bright));
+    border-radius:2px; transition:width 0.5s ease;
+    box-shadow:0 0 6px rgba(155,77,255,0.5);
+  }
+  .quest-count { font-family:'Orbitron',monospace; font-size:11px; color:var(--text-dim); white-space:nowrap; }
+
+  .quest-input-row { display:flex; gap:8px; }
+  .quest-input {
+    flex:1; background:rgba(10,10,24,0.8);
+    border:1px solid var(--border-dim); border-radius:3px;
+    color:var(--text-primary); font-family:'Rajdhani',sans-serif;
+    font-size:14px; font-weight:600; padding:8px 10px;
+    text-align:center; transition:border-color 0.3s;
+  }
+  .quest-input:focus { outline:none; border-color:rgba(107,33,212,0.5); }
+  .quest-done-btn {
+    padding:8px 16px;
+    background: linear-gradient(135deg, rgba(22,163,74,0.3), rgba(16,185,129,0.2));
+    border:1px solid rgba(22,163,74,0.4); border-radius:3px;
+    color:#4ade80; font-family:'Orbitron',monospace;
+    font-size:9px; font-weight:700; letter-spacing:1px;
+    cursor:pointer; transition:all 0.3s;
+  }
+  .quest-done-btn:hover { background:rgba(22,163,74,0.4); box-shadow:0 0 15px rgba(22,163,74,0.3); }
+  .quest-done-btn.completed {
+    background:rgba(22,163,74,0.15); color:rgba(74,222,128,0.5);
+    border-color:rgba(22,163,74,0.2); cursor:default;
+  }
+
+  /* BONUS QUESTS */
+  .bonus-section-title {
+    font-size:9px; letter-spacing:3px; color:var(--gold);
+    text-transform:uppercase; margin:20px 0 10px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .bonus-section-title::after {
+    content:''; flex:1; height:1px;
+    background:linear-gradient(90deg, rgba(245,158,11,0.3), transparent);
+  }
+
+  .bonus-quest {
+    background:rgba(245,158,11,0.04);
+    border:1px solid rgba(245,158,11,0.15);
+    border-radius:4px; padding:12px 14px; margin-bottom:8px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .bonus-icon { font-size:20px; width:24px; text-align:center; }
+  .bonus-info { flex:1; }
+  .bonus-title { font-size:13px; font-weight:600; color:var(--text-primary); margin-bottom:2px; }
+  .bonus-reward { font-size:11px; color:var(--gold); font-family:'Orbitron',monospace; }
+  .bonus-btn {
+    padding:6px 12px;
+    background:rgba(245,158,11,0.1);
+    border:1px solid rgba(245,158,11,0.3);
+    border-radius:3px; color:var(--gold);
+    font-family:'Orbitron',monospace; font-size:9px;
+    font-weight:700; letter-spacing:1px; cursor:pointer;
+    transition:all 0.3s;
+  }
+  .bonus-btn:hover { background:rgba(245,158,11,0.2); }
+  .bonus-btn.done { opacity:0.4; cursor:default; }
+
+  /* ── SHOP ── */
+  .shop-header {
+    text-align:center; margin-bottom:20px;
+  }
+  .shop-title {
+    font-family:'Cinzel Decorative',serif;
+    font-size:16px; color:var(--gold);
+    text-shadow:0 0 20px rgba(245,158,11,0.4);
+    margin-bottom:4px;
+  }
+  .shop-sub { font-size:11px; color:var(--text-muted); letter-spacing:2px; }
+
+  .lang-toggle {
+    display:flex; gap:0; border:1px solid var(--border-dim);
+    border-radius:3px; overflow:hidden; margin-bottom:16px; width:fit-content;
+  }
+  .lang-btn {
+    padding:6px 14px; background:transparent; border:none;
+    font-family:'Orbitron',monospace; font-size:9px; letter-spacing:1px;
+    color:var(--text-muted); cursor:pointer; transition:all 0.3s;
+  }
+  .lang-btn.active { background:rgba(245,158,11,0.15); color:var(--gold); }
+
+  .scroll-card {
+    background: linear-gradient(135deg, #0d0a00 0%, #1a1200 50%, #0a0800 100%);
+    border:1px solid rgba(245,158,11,0.2);
+    border-radius:6px; padding:16px; margin-bottom:12px;
+    position:relative; overflow:hidden;
+    transition:all 0.3s;
+  }
+  .scroll-card:hover { border-color:rgba(245,158,11,0.4); box-shadow:0 0 20px rgba(245,158,11,0.1); }
+  .scroll-card.locked-scroll { opacity:0.6; }
+
+  .scroll-top { display:flex; align-items:flex-start; gap:12px; margin-bottom:10px; }
+  .scroll-emoji { font-size:28px; }
+  .scroll-info { flex:1; }
+  .scroll-name {
+    font-family:'Orbitron',monospace; font-size:12px; font-weight:700;
+    color:var(--gold-light); margin-bottom:3px; letter-spacing:1px;
+  }
+  .scroll-desc { font-size:12px; color:var(--text-dim); line-height:1.4; }
+  .scroll-locked-tag {
+    position:absolute; top:10px; right:10px;
+    background:rgba(220,38,38,0.15); border:1px solid rgba(220,38,38,0.3);
+    border-radius:2px; padding:2px 8px;
+    font-size:9px; letter-spacing:1px; color:#f87171;
+    font-family:'Orbitron',monospace;
+  }
+
+  .scroll-footer { display:flex; align-items:center; justify-content:space-between; }
+  .scroll-price {
+    font-family:'Orbitron',monospace; font-size:14px; font-weight:700;
+    color:var(--gold); display:flex; align-items:center; gap:4px;
+  }
+  .scroll-buy-btn {
+    padding:8px 16px;
+    background: linear-gradient(135deg, rgba(245,158,11,0.3), rgba(251,191,36,0.2));
+    border:1px solid rgba(245,158,11,0.4); border-radius:3px;
+    color:var(--gold); font-family:'Orbitron',monospace;
+    font-size:9px; font-weight:700; letter-spacing:1px;
+    cursor:pointer; transition:all 0.3s;
+  }
+  .scroll-buy-btn:hover { background:rgba(245,158,11,0.4); box-shadow:0 0 15px rgba(245,158,11,0.3); }
+  .scroll-buy-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+  /* ── TRANSFORM MODAL ── */
+  #transformModal {
+    display:none; position:fixed; inset:0; z-index:500;
+    background:rgba(0,0,0,0.85); backdrop-filter:blur(4px);
+    align-items:center; justify-content:center;
+  }
+  #transformModal.open { display:flex; }
+
+  .modal-card {
+    width:min(340px,90vw);
+    background: linear-gradient(135deg, #0d0520, #1a0a2e);
+    border:1px solid rgba(155,77,255,0.4);
+    border-radius:6px; padding:24px;
+    box-shadow:0 0 60px rgba(107,33,212,0.3);
+    animation: popupSlide 0.4s ease;
+  }
+  .modal-title {
+    font-family:'Orbitron',monospace; font-size:13px; font-weight:700;
+    color:var(--purple-light); letter-spacing:2px; margin-bottom:6px;
+  }
+  .modal-sub { font-size:12px; color:var(--text-muted); margin-bottom:20px; }
+  .modal-xp-avail {
+    font-family:'Orbitron',monospace; font-size:22px; font-weight:900;
+    color:var(--purple-bright); text-shadow:0 0 15px rgba(155,77,255,0.6);
+    margin-bottom:4px;
+  }
+  .modal-xp-label { font-size:10px; color:var(--text-muted); letter-spacing:2px; margin-bottom:16px; }
+
+  .modal-stat-options { display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
+  .modal-stat-opt {
+    display:flex; align-items:center; gap:12px;
+    background:rgba(107,33,212,0.08); border:1px solid rgba(107,33,212,0.2);
+    border-radius:4px; padding:12px; cursor:pointer; transition:all 0.3s;
+    position:relative;
+  }
+  .modal-stat-opt:hover:not(.locked-opt) { border-color:rgba(155,77,255,0.4); background:rgba(107,33,212,0.15); }
+  .modal-stat-opt.locked-opt { opacity:0.4; cursor:not-allowed; }
+  .opt-icon { font-size:20px; }
+  .opt-info { flex:1; }
+  .opt-name { font-size:13px; font-weight:700; color:var(--text-primary); }
+  .opt-current { font-size:11px; color:var(--text-muted); font-family:'Orbitron',monospace; }
+  .opt-locked-tag {
+    font-size:9px; color:#f87171; letter-spacing:1px;
+    font-family:'Orbitron',monospace;
+  }
+
+  .modal-close {
+    width:100%; padding:10px;
+    background:rgba(255,255,255,0.03); border:1px solid var(--border-dim);
+    border-radius:3px; color:var(--text-muted);
+    font-family:'Orbitron',monospace; font-size:9px; letter-spacing:2px;
+    cursor:pointer; transition:all 0.3s;
+  }
+  .modal-close:hover { border-color:rgba(155,77,255,0.3); color:var(--text-dim); }
+
+  /* ── TOAST ── */
+  #toast {
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+    background: linear-gradient(135deg, rgba(107,33,212,0.9), rgba(155,77,255,0.8));
+    border:1px solid rgba(155,77,255,0.5);
+    border-radius:4px; padding:10px 20px;
+    font-family:'Orbitron',monospace; font-size:11px; letter-spacing:1px;
+    color:#fff; box-shadow:0 0 30px rgba(107,33,212,0.5);
+    z-index:2000; pointer-events:none;
+    opacity:0; transition:opacity 0.3s;
+  }
+  #toast.show { opacity:1; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width:4px; }
+  ::-webkit-scrollbar-track { background:var(--bg-deep); }
+  ::-webkit-scrollbar-thumb { background:rgba(107,33,212,0.4); border-radius:2px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ QUEST NOTIFICATION OVERLAY ═══ -->
+<div id="questOverlay">
+  <div class="quest-popup">
+    <div class="popup-scan"></div>
+    <div class="popup-top-bar">
+      <div class="dot"></div>
+      <span>System Notification</span>
+    </div>
+    <div class="popup-body">
+      <div class="popup-icon">⚔️</div>
+      <div class="popup-title">Daily Quest Available</div>
+      <div class="popup-heading">NEW QUEST ASSIGNED</div>
+      <div class="popup-sub">Complete your daily training, Hunter.</div>
+
+      <div class="popup-quests">
+        <div class="popup-quest-item">
+          <span class="pq-icon">💪</span>
+          <span class="pq-text">Push-ups</span>
+          <span class="pq-count">×100</span>
+        </div>
+        <div class="popup-quest-item">
+          <span class="pq-icon">🦵</span>
+          <span class="pq-text">Squats</span>
+          <span class="pq-count">×100</span>
+        </div>
+        <div class="popup-quest-item">
+          <span class="pq-icon">🏔️</span>
+          <span class="pq-text">Mountain Climbers</span>
+          <span class="pq-count">×100</span>
+        </div>
+        <div class="popup-quest-item">
+          <span class="pq-icon">🔥</span>
+          <span class="pq-text">Abdominal Crunches</span>
+          <span class="pq-count">×100</span>
+        </div>
+      </div>
+
+      <div class="popup-countdown">
+        <div class="countdown-label">Time Remaining</div>
+        <div class="countdown-timer" id="overlayTimer">23:59:59</div>
+      </div>
+      <div class="popup-progress-bar">
+        <div class="popup-progress-fill" id="overlayBar" style="width:100%;animation:none;"></div>
+      </div>
+
+      <button class="popup-btn" onclick="enterApp()">▶ ENTER DUNGEON</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN APP ═══ -->
+<div id="mainApp">
+  <header>
+    <div class="header-logo">⚔ SOLO LEVELING</div>
+    <div class="header-time" id="headerTime">00:00</div>
+  </header>
+
+  <div class="container">
+
+    <!-- ── PROFILE CARD ── -->
+    <div class="profile-card">
+      <div class="profile-rank-row">
+        <div class="rank-badge">
+          <div class="rank-letter" id="rankLetter">E</div>
+          <div class="rank-info">
+            <div class="rank-label">Current Rank</div>
+            <div class="rank-name" id="rankName">E-Rank Hunter</div>
+          </div>
+        </div>
+        <div class="level-display">
+          <div class="level-label">Level</div>
+          <div class="level-num" id="levelNum">1</div>
+        </div>
+      </div>
+
+      <div class="profile-divider"></div>
+
+      <div class="xp-coins-row">
+        <div class="stat-pill">
+          <div class="stat-pill-label">Experience</div>
+          <div class="stat-pill-value xp" id="xpDisplay">0</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-pill-label">Coins 🪙</div>
+          <div class="stat-pill-value coins" id="coinsDisplay">0</div>
+        </div>
+      </div>
+
+      <div class="xp-bar-wrap">
+        <div class="xp-bar-label">
+          <span>XP Progress</span>
+          <span id="xpBarLabel">0 / 100</span>
+        </div>
+        <div class="xp-bar">
+          <div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="stats-section-title">Hunter Stats</div>
+      <div class="stats-grid">
+        <div class="stat-box" onclick="openTransform()">
+          <div class="stat-box-name">⚔ Strength</div>
+          <div class="stat-box-val" id="strVal">12</div>
+          <div class="stat-box-bar"><div class="stat-box-bar-fill str-bar" id="strBar" style="width:12%"></div></div>
+        </div>
+        <div class="stat-box" onclick="openTransform()">
+          <div class="stat-box-name">💨 Agility</div>
+          <div class="stat-box-val" id="agiVal">18</div>
+          <div class="stat-box-bar"><div class="stat-box-bar-fill agi-bar" id="agiBar" style="width:18%"></div></div>
+        </div>
+        <div class="stat-box" onclick="openTransform()">
+          <div class="stat-box-name">❤ Vitality</div>
+          <div class="stat-box-val" id="vitVal">15</div>
+          <div class="stat-box-bar"><div class="stat-box-bar-fill vit-bar" id="vitBar" style="width:15%"></div></div>
+        </div>
+        <div class="stat-box" onclick="openTransform()">
+          <div class="stat-box-name">👁 Sense</div>
+          <div class="stat-box-val" id="senVal">10</div>
+          <div class="stat-box-bar"><div class="stat-box-bar-fill sen-bar" id="senBar" style="width:10%"></div></div>
+        </div>
+        <div class="stat-box locked">
+          <div class="stat-box-name">🧠 Intelligence</div>
+          <div class="stat-box-val" id="intVal">0</div>
+          <div class="stat-box-bar"><div class="stat-box-bar-fill int-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <button class="transform-btn" onclick="openTransform()">⟳ TRANSFORM XP → STATS</button>
+    </div>
+
+    <!-- ── TABS ── -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('quests',this)">Quests</button>
+      <button class="tab-btn" onclick="switchTab('shop',this)">Shop</button>
+    </div>
+
+    <!-- ── QUESTS TAB ── -->
+    <div id="tab-quests" class="tab-content active">
+
+      <div id="questsContainer"></div>
+
+      <!-- BONUS QUESTS -->
+      <div class="bonus-section-title">🪙 Bonus Quests</div>
+      <div id="bonusContainer"></div>
+
+    </div>
+
+    <!-- ── SHOP TAB ── -->
+    <div id="tab-shop" class="tab-content">
+      <div class="shop-header">
+        <div class="shop-title">📜 Secret Scroll Shop</div>
+        <div class="shop-sub">Knowledge is power. Power has a price.</div>
+      </div>
+
+      <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLang('en',this)">EN</button>
+        <button class="lang-btn" onclick="setLang('sw',this)">SW</button>
+      </div>
+
+      <div id="scrollsContainer"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── TRANSFORM MODAL ── -->
+<div id="transformModal">
+  <div class="modal-card">
+    <div class="modal-title">⟳ STAT CONVERSION</div>
+    <div class="modal-sub">Choose where to allocate your experience.</div>
+    <div class="modal-xp-avail" id="modalXpAvail">0</div>
+    <div class="modal-xp-label">XP AVAILABLE TO CONVERT</div>
+    <div class="modal-stat-options" id="modalStatOpts"></div>
+    <button class="modal-close" onclick="closeTransform()">✕ CANCEL</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════
+//  STATE
+// ═══════════════════════════════
+const STATE = {
+  xp: 0, coins: 0, level: 1, rank: 'E',
+  stats: { str:12, agi:18, vit:15, sen:10, int:0 },
+  questsDone: { pushups:false, squats:false, climbers:false, crunches:false },
+  bonusDone: {},
+  lastQuestDate: '',
+  xpToNextLevel: 100,
+  totalXpThisLevel: 0,
+  // reality check: days exercised consecutively
+  streakDays: 0,
+  lastExerciseDate: '',
+};
+
+// XP per quest
+const QUEST_XP = 25;
+const LEVEL_COINS = 10;
+const RANK_THRESHOLDS = { 'E':1,'D':20,'C':40,'B':60,'A':80,'S':100 };
+const RANKS = ['E','D','C','B','A','S'];
+const RANK_NAMES = {
+  'E':'E-Rank Hunter','D':'D-Rank Hunter','C':'C-Rank Hunter',
+  'B':'B-Rank Hunter','A':'A-Rank Hunter','S':'S-Rank Hunter'
+};
+
+// How many days of exercise before stat can be increased
+// (reality check: ~14 days discipline for real body change)
+const STAT_UNLOCK_DAYS = {
+  str: 3,   // strength needs 3 days
+  agi: 2,   // agility needs 2 days
+  vit: 5,   // vitality needs 5 days
+  sen: 1,   // sense needs 1 day
+  int: 999  // intelligence only via scrolls
+};
+
+// ═══════════════════════════════
+//  QUESTS DATA
+// ═══════════════════════════════
+const MAIN_QUESTS = [
+  { id:'pushups',  icon:'💪', name:'Push-ups',         target:100, xp:QUEST_XP },
+  { id:'squats',   icon:'🦵', name:'Squats',           target:100, xp:QUEST_XP },
+  { id:'climbers', icon:'🏔️', name:'Mountain Climbers', target:100, xp:QUEST_XP },
+  { id:'crunches', icon:'🔥', name:'Abdominal Crunches',target:100, xp:QUEST_XP },
+];
+
+// Random bonus quests pool — picked randomly each day
+const BONUS_POOL = [
+  { id:'water',    icon:'💧', en:'Drink 11 cups of water today',         sw:'Kunywa vikombe 11 vya maji leo',       coins:3 },
+  { id:'sleep',    icon:'😴', en:'Sleep before midnight, wake by 6AM',   sw:'Lala kabla ya usiku wa manane',        coins:3 },
+  { id:'dopamine', icon:'🧠', en:'Dopamine Control — No porn today',     sw:'Udhibiti wa dopamine — Siku bila ponografia', coins:3 },
+  { id:'anime',    icon:'🎌', en:'Watch anime instead of scrolling',     sw:'Angalia anime badala ya kutazama ovyo', coins:3 },
+  { id:'choc',     icon:'🍫', en:'Eat something sweet (healthy reward)',  sw:'Kula kitu kitamu kama tuzo',           coins:3 },
+  { id:'walk',     icon:'🚶', en:'Walk 30 minutes outside',              sw:'Tembea nje kwa dakika 30',             coins:3 },
+  { id:'code',     icon:'💻', en:'Code or study for 30 minutes',         sw:'Code au jifunze kwa dakika 30',        coins:3 },
+  { id:'nosg',     icon:'📵', en:'No social media for 3 hours',          sw:'Hakuna mitandao ya kijamii kwa masaa 3',coins:3 },
+];
+
+// Today's 3 bonus quests (random)
+let todayBonusQuests = [];
+
+// ═══════════════════════════════
+//  SCROLLS DATA
+// ═══════════════════════════════
+const SCROLLS = [
+  {
+    id:'s1', emoji:'📜', price:30, tier:1,
+    en:{name:'Scroll of Dawn Discipline',
+        desc:'The secret schedule of the first light. Morning rituals that rewire your brain before the world wakes.'},
+    sw:{name:'Jarida la Nidhamu ya Alfajiri',
+        desc:'Ratiba ya siri ya mapema asubuhi. Mila ya asubuhi inayobadilisha ubongo wako kabla ulimwengu haujaibuka.'},
+  },
+  {
+    id:'s2', emoji:'🌊', price:50, tier:1,
+    en:{name:'Water Breathing Manual',
+        desc:'Ancient breath training that maximizes oxygen flow, boosts stamina, and clears mental fog within days.'},
+    sw:{name:'Mwongozo wa Kupumua kwa Maji',
+        desc:'Mafunzo ya zamani ya kupumua yanayoongeza oksijeni, stamina, na kusafisha ukungu wa akili kwa siku chache.'},
+  },
+  {
+    id:'s3', emoji:'🔥', price:70, tier:2,
+    en:{name:'Flame Breathing Protocol',
+        desc:'Explosive power training system. Hidden 21-day program that triples strength output using breath and tension.'},
+    sw:{name:'Itifaki ya Kupumua Moto',
+        desc:'Mfumo wa mafunzo ya nguvu. Mpango wa siri wa siku 21 unaoongeza nguvu mara tatu kwa kupumua na mvutano.'},
+  },
+  {
+    id:'s4', emoji:'⚡', price:90, tier:2,
+    en:{name:'Scroll of Agility Ascension',
+        desc:'Speed and reaction training. The exact daily drills used by elite athletes — kept hidden from amateurs.'},
+    sw:{name:'Jarida la Kupanda kwa Ujanja',
+        desc:'Mafunzo ya kasi na majibu. Mazoezi ya kila siku yanayotumiwa na wanamichezo bora — yaliyofichwa kutoka kwa wapendwa.'},
+  },
+  {
+    id:'s5', emoji:'🧠', price:120, tier:3,
+    en:{name:'Intelligence Unlock Codex',
+        desc:'The forbidden knowledge scroll. Unlocks your Intelligence stat permanently. Contains deep focus and cognitive enhancement protocols.'},
+    sw:{name:'Msimbo wa Kufungua Akili',
+        desc:'Jarida la maarifa yaliyopigwa marufuku. Inafungua stat yako ya Intelligence milele. Ina itifaki za umakini wa kina na kuimarisha utambuzi.'},
+    unlocksInt: true,
+  },
+  {
+    id:'s6', emoji:'👁️', price:150, tier:3,
+    en:{name:'Scroll of the Shadow Monarch',
+        desc:'The deepest secret. A full 90-day transformation system. Body, mind, and discipline — all three pillars, completely redesigned.'},
+    sw:{name:'Jarida la Mfalme wa Vivuli',
+        desc:'Siri ya kina zaidi. Mfumo kamili wa mabadiliko ya siku 90. Mwili, akili, na nidhamu — nguzo zote tatu, zimebadilishwa kabisa.'},
+  },
+];
+
+// ═══════════════════════════════
+//  LANG
+// ═══════════════════════════════
+let currentLang = 'en';
+function setLang(l, btn) {
+  currentLang = l;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderShop();
+}
+
+// ═══════════════════════════════
+//  SAVE / LOAD
+// ═══════════════════════════════
+function save() { localStorage.setItem('sl_state', JSON.stringify(STATE)); }
+function load() {
+  const d = localStorage.getItem('sl_state');
+  if(d) Object.assign(STATE, JSON.parse(d));
+}
+
+// ═══════════════════════════════
+//  TIMER
+// ═══════════════════════════════
+function getSecondsUntilMidnight() {
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(24,0,0,0);
+  return Math.floor((midnight - now) / 1000);
+}
+
+function formatTime(s) {
+  const h = String(Math.floor(s/3600)).padStart(2,'0');
+  const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
+  const sc = String(s%60).padStart(2,'0');
+  return `${h}:${m}:${sc}`;
+}
+
+let overlaySeconds = getSecondsUntilMidnight();
+function tickOverlay() {
+  overlaySeconds = getSecondsUntilMidnight();
+  const el = document.getElementById('overlayTimer');
+  if(el) el.textContent = formatTime(overlaySeconds);
+  const bar = document.getElementById('overlayBar');
+  if(bar) bar.style.width = ((overlaySeconds/86400)*100)+'%';
+}
+
+function tickHeader() {
+  const now = new Date();
+  const t = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  const el = document.getElementById('headerTime');
+  if(el) el.textContent = t;
+}
+
+// ═══════════════════════════════
+//  ENTER APP
+// ═══════════════════════════════
+function enterApp() {
+  document.getElementById('questOverlay').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  checkDailyReset();
+  renderAll();
+  setInterval(tickHeader,1000);
+  tickHeader();
+  let dungeon = new Audio("sound.mp3")
+  dungeon.currentTime = 0
+  dungeon.play()
+}
+
+// ═══════════════════════════════
+//  DAILY RESET
+// ═══════════════════════════════
+function todayStr() {
+  return new Date().toISOString().slice(0,10);
+}
+
+function checkDailyReset() {
+  const today = todayStr();
+  if(STATE.lastQuestDate !== today) {
+    // Penalty: if yesterday quests weren't done, lose yesterday's possible XP
+    if(STATE.lastQuestDate) {
+      const allDone = Object.values(STATE.questsDone).every(v=>v);
+      if(!allDone) {
+        // Count how many were done yesterday
+        const doneCnt = Object.values(STATE.questsDone).filter(v=>v).length;
+        const penalty = doneCnt * QUEST_XP;
+        STATE.xp = Math.max(0, STATE.xp - penalty);
+        STATE.totalXpThisLevel = Math.max(0, STATE.totalXpThisLevel - penalty);
+      } else {
+        // Streak
+        STATE.streakDays++;
+        STATE.lastExerciseDate = STATE.lastQuestDate;
+      }
+    }
+    STATE.lastQuestDate = today;
+    STATE.questsDone = { pushups:false, squats:false, climbers:false, crunches:false };
+    STATE.bonusDone = {};
+    // Pick 3 random bonus quests
+    const shuffled = [...BONUS_POOL].sort(()=>Math.random()-0.5);
+    todayBonusQuests = shuffled.slice(0,3);
+    save();
+  } else {
+    // Restore today's bonus quests (same seed = use saved indices)
+    if(!todayBonusQuests.length) {
+      const shuffled = [...BONUS_POOL].sort(()=>Math.random()-0.5);
+      todayBonusQuests = shuffled.slice(0,3);
+    }
+  }
+}
+
+// ═══════════════════════════════
+//  QUEST COMPLETE
+// ═══════════════════════════════
+function completeQuest(id) {
+  if(STATE.questsDone[id]) return;
+  STATE.questsDone[id] = true;
+  STATE.xp += QUEST_XP;
+  STATE.totalXpThisLevel += QUEST_XP;
+  checkLevelUp();
+  save();
+  renderAll();
+  showToast(`+${QUEST_XP} XP`);
+}
+
+function completeBonusQuest(id) {
+  if(STATE.bonusDone[id]) return;
+  STATE.bonusDone[id] = true;
+  STATE.coins += 3;
+  save();
+  renderAll();
+  showToast('+3 🪙 Coins');
+}
+
+// ═══════════════════════════════
+//  LEVEL / RANK
+// ═══════════════════════════════
+function checkLevelUp() {
+  const needed = STATE.level * 100;
+  if(STATE.totalXpThisLevel >= needed) {
+    STATE.level++;
+    STATE.totalXpThisLevel = 0;
+    STATE.coins += LEVEL_COINS;
+    STATE.xpToNextLevel = STATE.level * 100;
+    // Check rank
+    const rankIdx = Math.min(Math.floor((STATE.level-1)/20), RANKS.length-1);
+    STATE.rank = RANKS[rankIdx];
+    showToast(`LEVEL UP! → Lv.${STATE.level} +${LEVEL_COINS}🪙`);
+  }
+}
+
+// ═══════════════════════════════
+//  TRANSFORM XP → STATS
+// ═══════════════════════════════
+function openTransform() {
+  if(STATE.xp < 10) { showToast('Need at least 10 XP to convert'); return; }
+  document.getElementById('transformModal').classList.add('open');
+  document.getElementById('modalXpAvail').textContent = STATE.xp;
+
+  const opts = [
+    { key:'str', icon:'⚔️', name:'Strength', days:STAT_UNLOCK_DAYS.str },
+    { key:'agi', icon:'💨', name:'Agility',   days:STAT_UNLOCK_DAYS.agi },
+    { key:'vit', icon:'❤️', name:'Vitality',  days:STAT_UNLOCK_DAYS.vit },
+    { key:'sen', icon:'👁️', name:'Sense',     days:STAT_UNLOCK_DAYS.sen },
+    { key:'int', icon:'🧠', name:'Intelligence', days:STAT_UNLOCK_DAYS.int },
+  ];
+
+  const container = document.getElementById('modalStatOpts');
+  container.innerHTML = '';
+
+  opts.forEach(opt => {
+    const unlocked = opt.key === 'int'
+      ? STATE.stats.int > 0  // int only via scroll
+      : STATE.streakDays >= opt.days;
+
+    const div = document.createElement('div');
+    div.className = 'modal-stat-opt' + (unlocked ? '' : ' locked-opt');
+    div.innerHTML = `
+      <div class="opt-icon">${opt.icon}</div>
+      <div class="opt-info">
+        <div class="opt-name">${opt.name}</div>
+        <div class="opt-current">Current: ${STATE.stats[opt.key]}</div>
+      </div>
+      ${unlocked
+        ? '<div style="font-family:Orbitron,monospace;font-size:10px;color:#c084fc;">10 XP → +1</div>'
+        : `<div class="opt-locked-tag">🔒 ${opt.key==='int'?'BUY SCROLL':'NEED '+opt.days+'D STREAK'}</div>`}
+    `;
+    if(unlocked) {
+      div.onclick = () => convertXpToStat(opt.key);
+    }
+    container.appendChild(div);
+  });
+}
+
+function convertXpToStat(key) {
+  if(STATE.xp < 10) { showToast('Not enough XP'); return; }
+  STATE.xp -= 10;
+  STATE.stats[key]++;
+  save();
+  document.getElementById('transformModal').classList.remove('open');
+  renderAll();
+  showToast(`+1 ${key.toUpperCase()}! 10 XP used`);
+}
+
+function closeTransform() {
+  document.getElementById('transformModal').classList.remove('open');
+}
+
+// ═══════════════════════════════
+//  BUY SCROLL
+// ═══════════════════════════════
+function buyScroll(id) {
+  const scroll = SCROLLS.find(s=>s.id===id);
+  if(!scroll) return;
+  if(STATE.coins < scroll.price) { showToast('Not enough 🪙 coins'); return; }
+  STATE.coins -= scroll.price;
+  if(scroll.unlocksInt) {
+    STATE.stats.int = 1;
+    showToast('🧠 Intelligence UNLOCKED!');
+  } else {
+    showToast(`📜 Scroll purchased! Check your knowledge.`);
+  }
+  save();
+  renderAll();
+}
+
+// ═══════════════════════════════
+//  RENDER
+// ═══════════════════════════════
+function renderAll() {
+  renderProfile();
+  renderQuests();
+  renderShop();
+}
+
+function renderProfile() {
+  document.getElementById('rankLetter').textContent = STATE.rank;
+  document.getElementById('rankName').textContent = RANK_NAMES[STATE.rank];
+  document.getElementById('levelNum').textContent = STATE.level;
+  document.getElementById('xpDisplay').textContent = STATE.xp;
+  document.getElementById('coinsDisplay').textContent = STATE.coins;
+
+  const needed = STATE.level * 100;
+  const pct = Math.min(100, Math.floor((STATE.totalXpThisLevel/needed)*100));
+  document.getElementById('xpBarFill').style.width = pct+'%';
+  document.getElementById('xpBarLabel').textContent = `${STATE.totalXpThisLevel} / ${needed}`;
+
+  const s = STATE.stats;
+  document.getElementById('strVal').textContent = s.str;
+  document.getElementById('agiVal').textContent = s.agi;
+  document.getElementById('vitVal').textContent = s.vit;
+  document.getElementById('senVal').textContent = s.sen;
+  document.getElementById('intVal').textContent = s.int;
+
+  document.getElementById('strBar').style.width = Math.min(100,s.str)+'%';
+  document.getElementById('agiBar').style.width = Math.min(100,s.agi)+'%';
+  document.getElementById('vitBar').style.width = Math.min(100,s.vit)+'%';
+  document.getElementById('senBar').style.width = Math.min(100,s.sen)+'%';
+
+  // int box locked state
+  const intBox = document.getElementById('intVal').closest('.stat-box');
+  if(s.int > 0) intBox.classList.remove('locked');
+  else intBox.classList.add('locked');
+}
+
+function renderQuests() {
+  const c = document.getElementById('questsContainer');
+  c.innerHTML = '';
+  MAIN_QUESTS.forEach(q => {
+    const done = STATE.questsDone[q.id];
+    const pct = done ? 100 : 0;
+    const div = document.createElement('div');
+    div.className = 'quest-card';
+    div.innerHTML = `
+      <div class="quest-header">
+        <div class="quest-title">${q.icon} ${q.name}</div>
+        <div class="quest-xp">+${q.xp} XP</div>
+      </div>
+      <div class="quest-progress-row">
+        <div class="quest-prog-bar">
+          <div class="quest-prog-fill" style="width:${pct}%"></div>
+        </div>
+        <div class="quest-count">${done?q.target:0}/${q.target}</div>
+      </div>
+      <div class="quest-input-row">
+        <input class="quest-input" type="number" placeholder="Enter reps done" id="inp_${q.id}" ${done?'disabled':''}>
+        <button class="quest-done-btn ${done?'completed':''}" onclick="handleQuestDone('${q.id}',${q.target})">
+          ${done?'✓ DONE':'I DONE'}
+        </button>
+      </div>
+    `;
+    c.appendChild(div);
+  });
+
+  // Bonus
+  const bc = document.getElementById('bonusContainer');
+  bc.innerHTML = '';
+  todayBonusQuests.forEach(q => {
+    const done = STATE.bonusDone[q.id];
+    const div = document.createElement('div');
+    div.className = 'bonus-quest';
+    div.innerHTML = `
+      <div class="bonus-icon">${q.icon}</div>
+      <div class="bonus-info">
+        <div class="bonus-title">${q[currentLang]||q.en}</div>
+        <div class="bonus-reward">+3 🪙</div>
+      </div>
+      <button class="bonus-btn ${done?'done':''}" onclick="completeBonusQuest('${q.id}')" ${done?'disabled':''}>
+        ${done?'✓':'DONE'}
+      </button>
+    `;
+    bc.appendChild(div);
+  });
+}
+
+function handleQuestDone(id, target) {
+  if(STATE.questsDone[id]) return;
+  const inp = document.getElementById('inp_'+id);
+  const val = parseInt(inp?.value||'0');
+  if(val >= target) {
+    completeQuest(id);
+  } else if(val > 0) {
+    showToast(`You did ${val}/${target}. Finish all reps first, Hunter.`);
+  } else {
+    // Honor system — if no input, trust yourself
+    completeQuest(id);
+  }
+}
+
+function renderShop() {
+  const c = document.getElementById('scrollsContainer');
+  if(!c) return;
+  c.innerHTML = '';
+  SCROLLS.forEach(scroll => {
+    const canAfford = STATE.coins >= scroll.price;
+    const div = document.createElement('div');
+    div.className = 'scroll-card' + (canAfford?'':' locked-scroll');
+    const content = scroll[currentLang] || scroll.en;
+    div.innerHTML = `
+      <div class="scroll-top">
+        <div class="scroll-emoji">${scroll.emoji}</div>
+        <div class="scroll-info">
+          <div class="scroll-name">${content.name}</div>
+          <div class="scroll-desc">${content.desc}</div>
+        </div>
+      </div>
+      ${!canAfford?`<div class="scroll-locked-tag">🔒 LOCKED</div>`:''}
+      <div class="scroll-footer">
+        <div class="scroll-price">🪙 ${scroll.price}</div>
+        <button class="scroll-buy-btn" onclick="buyScroll('${scroll.id}')" ${canAfford?'':'disabled'}>
+          ${canAfford?'ACQUIRE':'NEED MORE 🪙'}
+        </button>
+      </div>
+    `;
+    c.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════
+//  TABS
+// ═══════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='shop') renderShop();
+}
+
+// ═══════════════════════════════
+//  TOAST
+// ═══════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ═══════════════════════════════
+//  INIT
+// ═══════════════════════════════
+load();
+setInterval(tickOverlay, 1000);
+tickOverlay();
+</script>
+</body>
+</html>
+<script>
+if("serviceWorker" in navigator) {
+  window.addEventListener("load", async () => {
+    try {
+      await navigator.serviceWorker.register("/sw.js");
+      console.log("SW registered");
+    } catch(e) { console.log("SW failed:", e); }
+  });
+}
+
+function showSystemNotif(title, body) {
+  if(Notification.permission === "granted") {
+    navigator.serviceWorker.ready.then(reg => {
+      reg.showNotification(title, {
+        body: body,
+        icon: "/icon-192.png",
+        badge: "/icon-192.png",
+        vibrate: [200,100,200],
+        requireInteraction: false,
+      });
+    });
+  }
+}
+
+const _origEnterApp = typeof enterApp !== "undefined" ? enterApp : null;
+document.addEventListener("DOMContentLoaded", () => {
+  const origBtn = document.querySelector(".popup-btn");
+  if(origBtn) {
+    origBtn.addEventListener("click", () => {
+      if(Notification.permission === "default") {
+        Notification.requestPermission().then(p => {
+          if(p === "granted") {
+            showSystemNotif("⚔ SYSTEM ONLINE", "Daily quests assigned every morning at 06:00. ARISE, Hunter.");
+          }
+        });
+      }
+    });
+  }
+});
+</script>
