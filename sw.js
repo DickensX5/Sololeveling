@@ -1,10 +1,11 @@
-const CACHE_NAME = 'solo-leveling-v1';
+const CACHE_NAME = 'solo-leveling-v2';
 const ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png'
+  '/sound.mp3'
 ];
 
 // INSTALL — cache all assets
