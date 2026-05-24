@@ -1,4 +1,4 @@
-const CACHE_NAME = 'solo-leveling-v2';
+const CACHE_NAME = 'solo-leveling-v1.2';
 const ASSETS = [
   '/',
   '/index.html',
@@ -26,10 +26,18 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// FETCH — serve from cache first (offline first)
+// FETCH — network first online, cache first offline
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    caches.match(e.request).then(cached => {
+      const fetchPromise = fetch(e.request).then(response => {
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(e.request, response.clone());
+        });
+        return response;
+      });
+      return navigator.onLine ? fetchPromise : (cached || fetchPromise);
+    })
   );
 });
 
